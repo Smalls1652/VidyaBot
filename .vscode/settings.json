@@ -1,0 +1,11 @@
+{
+    "debug.internalConsoleOptions": "neverOpen",
+    "razor.disableBlazorDebugPrompt": true,
+    "git.detectSubmodules": false,
+    "dotnet.defaultSolution": "VidyaBot.sln",
+    "dotnet.server.useOmnisharp": true,
+    "dotnet.server.path": "latest",
+    "task.quickOpen.history": 0,
+    "task.autoDetect": "off",
+    "powershell.startAutomatically": false
+}
