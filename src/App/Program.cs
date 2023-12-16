@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using VidyaBot.App.Services;
-using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using System.Reflection;
@@ -25,22 +24,23 @@ hostBuilder.Logging
             .CreateDefault()
             .AddService(Assembly.GetExecutingAssembly().GetName().Name!);
 
-        logging.SetResourceBuilder(resourceBuilder)
+        logging
+            .SetResourceBuilder(resourceBuilder)
             .AddConsoleExporter()
             .AddOtlpExporter();
     });
 
 hostBuilder.Services
     .AddOpenTelemetry()
-    .ConfigureResource(resource =>
-        resource
-            .AddService(Assembly.GetExecutingAssembly().GetName().Name!)
-    )
+    .ConfigureResource(resourceBuilder => resourceBuilder.AddService(Assembly.GetExecutingAssembly().GetName().Name!))
     .WithMetrics(metrics =>
+    {
         metrics
             .AddRuntimeInstrumentation()
-            .AddOtlpExporter()
-    );
+            .AddHttpClientInstrumentation();
+
+        metrics.AddOtlpExporter();
+    });
 
 hostBuilder.Services.AddMemoryCache();
 
