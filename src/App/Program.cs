@@ -9,6 +9,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using System.Reflection;
 using OpenTelemetry.Logs;
+using OpenTelemetry.Exporter;
 
 var hostBuilder = Host.CreateApplicationBuilder(args);
 
@@ -67,7 +68,7 @@ hostBuilder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile(
         path: "appsettings.json",
-        optional: false,
+        optional: true,
         reloadOnChange: true
     )
     .AddJsonFile(
