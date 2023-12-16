@@ -21,4 +21,10 @@ public static partial class AppLogger
         message: "Executing command: {Command} {Arguments}"
     )]
     public static partial void ExecutingProcessLog(this ILogger logger, string command, string arguments);
+
+    [LoggerMessage(
+        level: LogLevel.Information,
+        message: "Video file will be saved to {OutputPath}."
+    )]
+    public static partial void VideoFileSavePathLog(this ILogger logger, string outputPath);
 }
