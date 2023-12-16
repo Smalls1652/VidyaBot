@@ -7,5 +7,6 @@
     "dotnet.server.path": "latest",
     "task.quickOpen.history": 0,
     "task.autoDetect": "off",
-    "powershell.startAutomatically": false
+    "powershell.startAutomatically": false,
+    "python.terminal.activateEnvironment": true
 }
