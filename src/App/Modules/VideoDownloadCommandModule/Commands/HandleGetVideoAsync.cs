@@ -24,7 +24,7 @@ public partial class VideoDownloadCommandModule
 
         _logger.ReceivedCommandLog(Context.User.Id, Context.Guild.Id);
 
-        string fileName = string.Empty;
+        string fileName;
         try
         {
             fileName = await GetVideoFileNameAsync(url);
@@ -66,61 +66,35 @@ Something went wrong getting the filename.
             return;
         }
 
+        string outputDirectoryPath = Path.Combine(
+            _configuration.GetSection("VideoDownloadPath").Value ?? Path.GetTempPath(),
+            Guid.NewGuid().ToString()
+        );
 
-        ProcessStartInfo downloadStartInfo = new()
+        _logger.VideoFileSavePathLog(outputDirectoryPath);
+
+        Directory.CreateDirectory(outputDirectoryPath);
+
+        string outputFilePath = Path.Combine(outputDirectoryPath, fileName);
+
+        try
         {
-            FileName = "python3",
-            ArgumentList =
-            {
-                "-m",
-                "yt_dlp",
-                "-f",
-                "bestvideo[ext=mp4][height<=?720]+bestaudio[ext=m4a]/best[ext=mp4]",
-                "--recode-video",
-                "mp4",
-                "--output",
-                "%(id)s.%(ext)s",
-                "--no-progress",
-                url
-            },
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            WorkingDirectory = Path.GetTempPath(),
-        };
-
-        _logger.ExecutingProcessLog(downloadStartInfo.FileName, string.Join(" ", downloadStartInfo.ArgumentList));
-        using Process process = new()
+            await DownloadVideoFileAsync(url, outputDirectoryPath);
+        }
+        catch (Exception e)
         {
-            StartInfo = downloadStartInfo
-        };
+            Directory.Delete(outputDirectoryPath, true);
+            
+            _logger.ErrorLog(e.Message, e);
 
-        process.Start();
+            await FollowupAsync(
+                text: "Something went wrong downloading the video. 😰"
+            );
 
-        while (!process.HasExited)
-        {
-            string? output = await process.StandardOutput.ReadLineAsync();
-            string? downloadProcError = await process.StandardError.ReadLineAsync();
-
-            if (output is not null)
-            {
-                _logger.LogInformation("{output}", output);
-            }
-
-            if (downloadProcError is not null)
-            {
-                _logger.LogError("{error}", downloadProcError);
-
-                await FollowupAsync(
-                    text: "Something went wrong. Please try again later."
-                );
-
-                return;
-            }
+            return;
         }
 
-        FileInfo outputFile = new(Path.Combine(Path.GetTempPath(), fileName));
+        FileInfo outputFile = new(outputFilePath);
 
         ButtonBuilder sourceUrlButton = new(
             label: "Source",
@@ -156,6 +130,8 @@ Something went wrong getting the filename.
             fileStream.Close();
 
             outputFile.Delete();
+
+            Directory.Delete(outputDirectoryPath, true);
         }
     }
 }
