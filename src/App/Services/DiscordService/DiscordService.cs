@@ -88,7 +88,7 @@ public class DiscordService : IDiscordService
             deleteMissing: true
         );
 #else
-        _logger.RegisteringSlashCommandsGloballyLog();
+        _logger.LogRegisteringSlashCommandsGlobally();
         await _interactionService!.RegisterCommandsGloballyAsync(
             deleteMissing: true
         );
