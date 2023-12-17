@@ -9,6 +9,9 @@ using VidyaBot.App.Modules;
 
 namespace VidyaBot.App.Services;
 
+/// <summary>
+/// Service for interacting with Discord.
+/// </summary>
 public class DiscordService : IDiscordService
 {
     private readonly DiscordSocketClient _socketClient;
@@ -16,6 +19,14 @@ public class DiscordService : IDiscordService
     private readonly IConfiguration _config;
     private readonly IServiceProvider _serviceProvider;
 
+    
+    /// <summary>
+    /// Initializes a new instance of <see cref="DiscordService"/>.
+    /// </summary>
+    /// <param name="socketClient">The Discord socket client.</param>
+    /// <param name="logger">The logger.</param>
+    /// <param name="config">The configuration.</param>
+    /// <param name="serviceProvider">The service provider.</param>
     public DiscordService(DiscordSocketClient socketClient, ILogger<DiscordService> logger, IConfiguration config, IServiceProvider serviceProvider)
     {
         _socketClient = socketClient;
@@ -26,6 +37,7 @@ public class DiscordService : IDiscordService
 
     private InteractionService? _interactionService;
 
+    /// <inheritdoc />
     public async Task ConnectAsync()
     {
         // Log into Discord
@@ -58,6 +70,14 @@ public class DiscordService : IDiscordService
         _socketClient.InteractionCreated += HandleSlashCommand;
     }
 
+    /// <summary>
+    /// Handles the client ready event and registers slash commands.
+    /// </summary>
+    /// <remarks>
+    /// This method will register slash commands to a test guild
+    /// if the application is running in debug mode.
+    /// </remarks>
+    /// <returns></returns>
     private async Task OnClientReadyAsync()
     {
 #if DEBUG
@@ -78,12 +98,23 @@ public class DiscordService : IDiscordService
         _logger.LogSlashCommandsLoaded(slashCommandsLoadedString);
     }
 
+    
+    /// <summary>
+    /// Handles a slash command interaction.
+    /// </summary>
+    /// <param name="interaction">The socket interaction.</param>
+    /// <returns></returns>
     private async Task HandleSlashCommand(SocketInteraction interaction)
     {
         SocketInteractionContext interactionContext = new(_socketClient, interaction);
         await _interactionService!.ExecuteCommandAsync(interactionContext, _serviceProvider);
     }
 
+    /// <summary>
+    /// Handles the logging of a <see cref="LogMessage"/> from the Discord client.
+    /// </summary>
+    /// <param name="logMessage">The log message to handle.</param>
+    /// <returns></returns>
     private Task HandleLog(LogMessage logMessage)
     {
         LogLevel logLevel = logMessage.Severity switch

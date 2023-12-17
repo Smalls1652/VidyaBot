@@ -6,6 +6,13 @@ namespace VidyaBot.App.Modules;
 
 public partial class VideoDownloadCommandModule
 {
+    /// <summary>
+    /// Get the output file name 'yt-dlp' will return for the given URL.
+    /// </summary>
+    /// <param name="url">The URL from the video sharing site.</param>
+    /// <returns>The output file name 'yt-dlp' will return.</returns>
+    /// <exception cref="Exception">A generic error occurred with the process.</exception>
+    /// <exception cref="NullReferenceException">The process returned a null value for the filename.</exception>
     private async Task<string> GetVideoFileNameAsync(string url)
     {
         ProcessStartInfo printFileNameStartInfo = new()

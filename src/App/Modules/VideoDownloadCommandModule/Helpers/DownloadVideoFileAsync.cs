@@ -6,6 +6,13 @@ namespace VidyaBot.App.Modules;
 
 public partial class VideoDownloadCommandModule
 {
+    /// <summary>
+    /// Download the video file with 'yt-dlp' from the given URL and save it to the given output path.
+    /// </summary>
+    /// <param name="url">The URL from the video sharing site.</param>
+    /// <param name="outputPath">The directory to output the video file to.</param>
+    /// <returns></returns>
+    /// <exception cref="Exception">A generic error occurred with the process.</exception>
     private async Task DownloadVideoFileAsync(string url, string outputPath)
     {
         ProcessStartInfo downloadStartInfo = new()

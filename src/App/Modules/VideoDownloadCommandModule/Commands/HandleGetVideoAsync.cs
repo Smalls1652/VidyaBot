@@ -8,6 +8,11 @@ namespace VidyaBot.App.Modules;
 
 public partial class VideoDownloadCommandModule
 {
+    /// <summary>
+    /// Download a video from a video sharing site and send it to the channel.
+    /// </summary>
+    /// <param name="url">The URL of the video to download.</param>
+    /// <returns></returns>
     [SlashCommand(
         name: "getvideo",
         description: "Download a video from a video sharing site and send it to the channel."
