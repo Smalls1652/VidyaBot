@@ -57,9 +57,7 @@ DiscordSocketConfig discordSocketConfig = new()
 #else
 DiscordSocketConfig discordSocketConfig = new()
 {
-    GatewayIntents = gatewayIntents,
-    UseInteractionSnowflakeDate = false,
-    LogLevel = LogSeverity.Debug
+    GatewayIntents = gatewayIntents
 };
 #endif
 
