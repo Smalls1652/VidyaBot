@@ -14,7 +14,11 @@ public partial class VideoDownloadCommandModule
     /// <param name="url">The URL of the video to download.</param>
     /// <returns></returns>
     [SlashCommand(
+#if DEBUG
+        name: "getvideodev",
+#else
         name: "getvideo",
+#endif
         description: "Download a video from a video sharing site and send it to the channel."
     )]
     private async Task HandleGetVideoAsync(
