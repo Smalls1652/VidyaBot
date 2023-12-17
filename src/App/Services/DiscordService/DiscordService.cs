@@ -4,6 +4,7 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using VidyaBot.App.Logging;
 using VidyaBot.App.Modules;
 
 namespace VidyaBot.App.Services;
@@ -28,13 +29,13 @@ public class DiscordService : IDiscordService
     public async Task ConnectAsync()
     {
         // Log into Discord
-        _logger.LogInformation("Connecting to Discord...");
+        _logger.LogConnectingToDiscord();
 
         if (_config.GetValue<string>("DiscordClientToken") is null)
         {
             Exception errorException = new("DiscordClientToken is null. Please set the DiscordClientToken environment variable.");
 
-            _logger.LogError(errorException, "{ErrorMessage}", errorException.Message);
+            _logger.LogGenericError(errorException.Message, errorException);
             throw errorException;
         }
         
@@ -45,7 +46,7 @@ public class DiscordService : IDiscordService
 
         await _socketClient.StartAsync();
 
-        _logger.LogInformation("Initializing Discord Interaction Service...");
+        _logger.LogInitializingDiscordInteractionService();
         _interactionService = new(
             discord: _socketClient.Rest
         );
@@ -61,20 +62,20 @@ public class DiscordService : IDiscordService
     {
 #if DEBUG
         ulong testGuildId = _config.GetValue<ulong>("DiscordTestGuildId");
-        _logger.LogInformation("Running in debug mode. Registering slash commands to test guild '{GuildId}'.", testGuildId);
+        _logger.LogRunningInDebugMode(testGuildId);
         await _interactionService!.RegisterCommandsToGuildAsync(
             guildId: testGuildId,
             deleteMissing: true
         );
 #else
-        _logger.LogInformation("Registering slash commands globally.");
+        _logger.RegisteringSlashCommandsGloballyLog();
         await _interactionService!.RegisterCommandsGloballyAsync(
             deleteMissing: true
         );
 #endif
 
         string slashCommandsLoadedString = string.Join(",", _interactionService.SlashCommands);
-        _logger.LogInformation("Slash commands loaded: {SlashCommandsLoaded}", slashCommandsLoadedString);
+        _logger.LogSlashCommandsLoaded(slashCommandsLoadedString);
     }
 
     private async Task HandleSlashCommand(SocketInteraction interaction)

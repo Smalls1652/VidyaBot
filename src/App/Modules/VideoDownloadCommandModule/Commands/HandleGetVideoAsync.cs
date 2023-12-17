@@ -22,7 +22,7 @@ public partial class VideoDownloadCommandModule
     {
         await DeferAsync();
 
-        _logger.ReceivedCommandLog(Context.User.Id, Context.Guild.Id);
+        _logger.LogReceivedCommand(Context.User.Id, Context.Guild.Id);
 
         string fileName;
         try
@@ -31,7 +31,7 @@ public partial class VideoDownloadCommandModule
         }
         catch (NullReferenceException e)
         {
-            _logger.ErrorLog(e.Message, e);
+            _logger.LogGenericError(e.Message, e);
 
             string errorText = $@"
 Something went wrong getting data about the video.
@@ -49,7 +49,7 @@ Something went wrong getting data about the video.
         }
         catch (Exception e)
         {
-            _logger.ErrorLog(e.Message, e);
+            _logger.LogGenericError(e.Message, e);
 
             string errorText = $@"
 Something went wrong getting the filename.
@@ -71,7 +71,7 @@ Something went wrong getting the filename.
             Guid.NewGuid().ToString()
         );
 
-        _logger.VideoFileSavePathLog(outputDirectoryPath);
+        _logger.LogVideoFileSavePath(outputDirectoryPath);
 
         Directory.CreateDirectory(outputDirectoryPath);
 
@@ -85,7 +85,7 @@ Something went wrong getting the filename.
         {
             Directory.Delete(outputDirectoryPath, true);
             
-            _logger.ErrorLog(e.Message, e);
+            _logger.LogGenericError(e.Message, e);
 
             await FollowupAsync(
                 text: "Something went wrong downloading the video. 😰"
@@ -107,7 +107,7 @@ Something went wrong getting the filename.
 
         using FileStream fileStream = outputFile.OpenRead();
 
-        _logger.LogInformation("Sending file to guild {GuildId}.", Context.Guild.Id);
+        _logger.LogSendingFile(Context.Guild.Id);
 
         try
         {
@@ -119,7 +119,7 @@ Something went wrong getting the filename.
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to send file to guild {GuildId}.", Context.Guild.Id);
+            _logger.LogFailedToSendFile(Context.Guild.Id, e);
 
             await FollowupAsync(
                 text: "Something went wrong. Please try again later."

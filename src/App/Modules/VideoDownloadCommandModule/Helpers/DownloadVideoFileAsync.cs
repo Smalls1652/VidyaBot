@@ -31,7 +31,7 @@ public partial class VideoDownloadCommandModule
             WorkingDirectory = outputPath,
         };
 
-        _logger.ExecutingProcessLog(downloadStartInfo.FileName, string.Join(" ", downloadStartInfo.ArgumentList));
+        _logger.LogExecutingProcess(downloadStartInfo.FileName, string.Join(" ", downloadStartInfo.ArgumentList));
         using Process process = new()
         {
             StartInfo = downloadStartInfo

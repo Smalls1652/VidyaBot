@@ -32,7 +32,7 @@ public partial class VideoDownloadCommandModule
             WorkingDirectory = Path.GetTempPath(),
         };
 
-        _logger.ExecutingProcessLog(printFileNameStartInfo.FileName, string.Join(" ", printFileNameStartInfo.ArgumentList));
+        _logger.LogExecutingProcess(printFileNameStartInfo.FileName, string.Join(" ", printFileNameStartInfo.ArgumentList));
 
         using Process printFileNameProcess = new()
         {
@@ -52,11 +52,6 @@ public partial class VideoDownloadCommandModule
 
         string? fileName = await printFileNameProcess.StandardOutput.ReadLineAsync();
 
-        if (fileName is null)
-        {
-            throw new NullReferenceException("The filename for the video returned as null.");
-        }
-
-        return fileName;
+        return fileName is null ? throw new NullReferenceException("The filename for the video returned as null.") : fileName;
     }
 }
