@@ -103,7 +103,33 @@ Something went wrong getting the filename.
             return;
         }
 
-        FileInfo outputFile = new(outputFilePath);
+        FileInfo initialVideoFile = new(outputFilePath);
+
+        FileInfo convertedOutputFile;
+        try
+        {
+            convertedOutputFile = await ConvertVideoFileAsync(initialVideoFile);
+        }
+        catch (Exception e)
+        {
+            Directory.Delete(outputDirectoryPath, true);
+            
+            _logger.LogGenericError(e.Message, e);
+
+            string errorText = $@"
+Something went wrong converting the video. 😰
+                    
+**Error message:**
+```log
+{e.Message}
+```";
+
+            await FollowupAsync(
+                text: errorText
+            );
+
+            return;
+        }
 
         ButtonBuilder sourceUrlButton = new(
             label: "Source",
@@ -114,7 +140,7 @@ Something went wrong getting the filename.
         ComponentBuilder componentBuilder = new ComponentBuilder()
             .WithButton(sourceUrlButton, 0);
 
-        using FileStream fileStream = outputFile.OpenRead();
+        using FileStream fileStream = convertedOutputFile.OpenRead();
 
         _logger.LogSendingFile(Context.Guild.Id);
 
@@ -138,7 +164,7 @@ Something went wrong getting the filename.
         {
             fileStream.Close();
 
-            outputFile.Delete();
+            convertedOutputFile.Delete();
 
             Directory.Delete(outputDirectoryPath, true);
         }
