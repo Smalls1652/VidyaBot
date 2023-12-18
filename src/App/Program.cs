@@ -10,8 +10,24 @@ using OpenTelemetry.Resources;
 using System.Reflection;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Exporter;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
+using Azure.Monitor.OpenTelemetry.Exporter;
 
 var hostBuilder = Host.CreateApplicationBuilder(args);
+
+hostBuilder.Configuration
+    .AddEnvironmentVariables()
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile(
+        path: "appsettings.json",
+        optional: true,
+        reloadOnChange: true
+    )
+    .AddJsonFile(
+        path: $"appsettings.{hostBuilder.Environment.EnvironmentName}.json",
+        optional: true,
+        reloadOnChange: true
+    );
 
 hostBuilder.Logging.ClearProviders();
 
@@ -29,6 +45,14 @@ hostBuilder.Logging
             .SetResourceBuilder(resourceBuilder)
             .AddConsoleExporter()
             .AddOtlpExporter();
+
+        if (hostBuilder.Configuration.GetValue<string>("APPLICATIONINSIGHTS_CONNECTION_STRING") is not null)
+        {
+            logging.AddAzureMonitorLogExporter(options =>
+            {
+                options.ConnectionString = hostBuilder.Configuration.GetValue<string>("APPLICATIONINSIGHTS_CONNECTION_STRING");
+            });
+        }
     });
 
 hostBuilder.Services
@@ -41,6 +65,14 @@ hostBuilder.Services
             .AddHttpClientInstrumentation();
 
         metrics.AddOtlpExporter();
+
+        if (hostBuilder.Configuration.GetValue<string>("APPLICATIONINSIGHTS_CONNECTION_STRING") is not null)
+        {
+            metrics.AddAzureMonitorMetricExporter(options =>
+            {
+                options.ConnectionString = hostBuilder.Configuration.GetValue<string>("APPLICATIONINSIGHTS_CONNECTION_STRING");
+            });
+        }
     });
 
 hostBuilder.Services.AddMemoryCache();
@@ -60,20 +92,6 @@ DiscordSocketConfig discordSocketConfig = new()
     GatewayIntents = gatewayIntents
 };
 #endif
-
-hostBuilder.Configuration
-    .AddEnvironmentVariables()
-    .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile(
-        path: "appsettings.json",
-        optional: true,
-        reloadOnChange: true
-    )
-    .AddJsonFile(
-        path: $"appsettings.{hostBuilder.Environment.EnvironmentName}.json",
-        optional: true,
-        reloadOnChange: true
-    );
 
 hostBuilder.Services
     .AddSingleton<DiscordSocketClient>(
